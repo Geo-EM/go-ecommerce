@@ -2,6 +2,8 @@ package api
 
 import (
 	"e-commerce/config"
+	"e-commerce/internal/api/rest"
+	"e-commerce/internal/api/rest/handlers"
 	"log"
 
 	"github.com/gofiber/fiber/v3"
@@ -10,9 +12,14 @@ import (
 func StartServer(config config.AppConfig) {
 	app := fiber.New()
 
+	setupRoutes(&rest.RestHandler{App: app})
+
 	if err := app.Listen("localhost:" + config.ServerPort); err != nil {
-		log.Println("Error starting server:", err)
-		return
+		log.Fatalln("Error starting server:", err)
 	}
-	log.Println("Server is running on port 9898")
+}
+
+func setupRoutes(restHandler *rest.RestHandler) {
+	handlers.SetupHealthCheckRoute(restHandler)
+	handlers.SetupUserRoutes(restHandler)
 }

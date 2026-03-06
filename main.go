@@ -8,7 +8,6 @@ import (
 
 func main() {
 	conf, err := config.SetupEnv()
-
 	if err != nil {
 		log.Fatalf("Error in config loading: %v\n", err)
 	}
