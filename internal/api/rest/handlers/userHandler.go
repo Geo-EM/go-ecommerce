@@ -2,33 +2,39 @@ package handlers
 
 import (
 	"e-commerce/internal/api/rest"
+	"e-commerce/internal/dto/userDto"
+	"e-commerce/internal/service"
+	"log"
 	"net/http"
 
 	"github.com/gofiber/fiber/v3"
 )
 
 type UserHandler struct {
-	// Service UserService
+	userService service.UserService
 }
 
 func SetupUserRoutes(restHandler *rest.RestHandler) {
 	app := restHandler.App
 
-	handler := UserHandler{}
+	userService := service.UserService{}
+	handler := UserHandler{
+		userService: userService,
+	}
 
 	// Public endpoints
 	app.Post("/register", handler.Register)
 	app.Post("/login", handler.Login)
 
 	// Private endpoints
-	app.Get("/verify", handler.GetVerificationCode)
 	app.Post("/verify", handler.verify)
+	app.Get("/verify", handler.GetVerificationCode)
 
-	app.Get("/profile", handler.GetProfile)
 	app.Post("/profile", handler.CreateProfile)
+	app.Get("/profile", handler.GetProfile)
 
-	app.Get("/cart", handler.GetCart)
 	app.Post("/cart", handler.UpdateCart)
+	app.Get("/cart", handler.GetCart)
 
 	app.Get("/order", handler.GetOrders)
 	app.Get("/order/:id", handler.GetOrderById)
@@ -38,8 +44,23 @@ func SetupUserRoutes(restHandler *rest.RestHandler) {
 }
 
 func (handler UserHandler) Register(ctx fiber.Ctx) error {
+	userInput := userDto.RegisterUserDto{}
+	if err := ctx.Bind().Body(&userInput); err != nil {
+		log.Println(userInput)
+		return ctx.Status(http.StatusBadRequest).JSON(&fiber.Map{
+			"message": "Invalid inputs",
+		})
+	}
+
+	token, err := handler.userService.RegisterUser(userInput)
+	if err != nil {
+		return ctx.Status(http.StatusInternalServerError).JSON(&fiber.Map{
+			"message": "Failed to register",
+		})
+	}
+
 	return ctx.Status(http.StatusOK).JSON(&fiber.Map{
-		"message": "Registered",
+		"token": token,
 	})
 }
 
