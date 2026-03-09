@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:latest
+    restart: always
+    environment:
+      POSTGRES_USER: go_e_commerce
+      POSTGRES_PASSWORD: asdS23!fg5Td
+      POSTGRES_DB: e_commerce
+    ports:
+      - "5433:5432"
+    volumes:
+      - db:/var/lib/postgresql
+
+volumes:
+  db:

@@ -17,33 +17,32 @@ type UserHandler struct {
 func SetupUserRoutes(restHandler *rest.RestHandler) {
 	app := restHandler.App
 
-	userService := service.UserService{}
 	handler := UserHandler{
-		userService: userService,
+		userService: service.UserService{},
 	}
 
 	// Public endpoints
-	app.Post("/register", handler.Register)
-	app.Post("/login", handler.Login)
+	app.Post("/register", handler.register)
+	app.Post("/login", handler.login)
 
 	// Private endpoints
 	app.Post("/verify", handler.verify)
-	app.Get("/verify", handler.GetVerificationCode)
+	app.Get("/verify", handler.getVerificationCode)
 
-	app.Post("/profile", handler.CreateProfile)
-	app.Get("/profile", handler.GetProfile)
+	app.Post("/profile", handler.createProfile)
+	app.Get("/profile", handler.getProfile)
 
-	app.Post("/cart", handler.UpdateCart)
-	app.Get("/cart", handler.GetCart)
+	app.Post("/cart", handler.updateCart)
+	app.Get("/cart", handler.getCart)
 
-	app.Get("/order", handler.GetOrders)
-	app.Get("/order/:id", handler.GetOrderById)
+	app.Get("/order", handler.getOrders)
+	app.Get("/order/:id", handler.getOrderById)
 
-	app.Post("/become-seller", handler.BecomeSeller)
+	app.Post("/become-seller", handler.becomeSeller)
 
 }
 
-func (handler UserHandler) Register(ctx fiber.Ctx) error {
+func (handler UserHandler) register(ctx fiber.Ctx) error {
 	userInput := userDto.RegisterUserDto{}
 	if err := ctx.Bind().Body(&userInput); err != nil {
 		log.Println(userInput)
@@ -64,13 +63,13 @@ func (handler UserHandler) Register(ctx fiber.Ctx) error {
 	})
 }
 
-func (handler UserHandler) Login(ctx fiber.Ctx) error {
+func (handler UserHandler) login(ctx fiber.Ctx) error {
 	return ctx.Status(http.StatusOK).JSON(&fiber.Map{
 		"message": "Logged in",
 	})
 }
 
-func (handler UserHandler) GetVerificationCode(ctx fiber.Ctx) error {
+func (handler UserHandler) getVerificationCode(ctx fiber.Ctx) error {
 	return ctx.Status(http.StatusOK).JSON(&fiber.Map{
 		"message": "Succeed!",
 	})
@@ -82,43 +81,43 @@ func (handler UserHandler) verify(ctx fiber.Ctx) error {
 	})
 }
 
-func (handler UserHandler) GetProfile(ctx fiber.Ctx) error {
+func (handler UserHandler) getProfile(ctx fiber.Ctx) error {
 	return ctx.Status(http.StatusOK).JSON(&fiber.Map{
 		"message": "Succeed!",
 	})
 }
 
-func (handler UserHandler) CreateProfile(ctx fiber.Ctx) error {
+func (handler UserHandler) createProfile(ctx fiber.Ctx) error {
 	return ctx.Status(http.StatusOK).JSON(&fiber.Map{
 		"message": "Succeed!",
 	})
 }
 
-func (handler UserHandler) GetCart(ctx fiber.Ctx) error {
+func (handler UserHandler) getCart(ctx fiber.Ctx) error {
 	return ctx.Status(http.StatusOK).JSON(&fiber.Map{
 		"message": "Succeed!",
 	})
 }
 
-func (handler UserHandler) UpdateCart(ctx fiber.Ctx) error {
+func (handler UserHandler) updateCart(ctx fiber.Ctx) error {
 	return ctx.Status(http.StatusOK).JSON(&fiber.Map{
 		"message": "Succeed!",
 	})
 }
 
-func (handler UserHandler) GetOrders(ctx fiber.Ctx) error {
+func (handler UserHandler) getOrders(ctx fiber.Ctx) error {
 	return ctx.Status(http.StatusOK).JSON(&fiber.Map{
 		"message": "Succeed!",
 	})
 }
 
-func (handler UserHandler) GetOrderById(ctx fiber.Ctx) error {
+func (handler UserHandler) getOrderById(ctx fiber.Ctx) error {
 	return ctx.Status(http.StatusOK).JSON(&fiber.Map{
 		"message": "Succeed!",
 	})
 }
 
-func (handler UserHandler) BecomeSeller(ctx fiber.Ctx) error {
+func (handler UserHandler) becomeSeller(ctx fiber.Ctx) error {
 	return ctx.Status(http.StatusOK).JSON(&fiber.Map{
 		"message": "Succeed!",
 	})
