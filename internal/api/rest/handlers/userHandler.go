@@ -54,8 +54,8 @@ func (handler UserHandler) register(ctx fiber.Ctx) error {
 
 	token, err := handler.userService.RegisterUser(userInput)
 	if err != nil {
-		return ctx.Status(http.StatusInternalServerError).JSON(&fiber.Map{
-			"message": "Failed to register",
+		return ctx.Status(http.StatusBadRequest).JSON(&fiber.Map{
+			"message": err.Error(),
 		})
 	}
 
