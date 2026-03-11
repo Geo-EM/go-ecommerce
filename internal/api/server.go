@@ -7,16 +7,24 @@ import (
 	"log"
 
 	"github.com/gofiber/fiber/v3"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
 func StartServer(config config.AppConfig) {
 	app := fiber.New()
 
-	setupRoutes(&rest.RestHandler{App: app})
+	db, err := gorm.Open(postgres.Open(config.Dsn), &gorm.Config{})
+	if err != nil {
+		log.Fatalln("Error connecting to database:", err)
+	}
 
-	if err := app.Listen("localhost:" + config.ServerPort); err != nil {
+	setupRoutes(&rest.RestHandler{App: app, DB: db})
+
+	if err := app.Listen(config.Host + ":" + config.ServerPort); err != nil {
 		log.Fatalln("Error starting server:", err)
 	}
+	log.Printf("Starting server on %s:%s\n", config.Host, config.ServerPort)
 }
 
 func setupRoutes(restHandler *rest.RestHandler) {

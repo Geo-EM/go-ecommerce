@@ -5,7 +5,7 @@ services:
     environment:
       POSTGRES_USER: go_e_commerce
       POSTGRES_PASSWORD: asdS23!fg5Td
-      POSTGRES_DB: e_commerce
+      POSTGRES_DB: e-commerce
     ports:
       - "5433:5432"
     volumes:
