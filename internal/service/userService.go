@@ -3,10 +3,13 @@ package service
 import (
 	"e-commerce/internal/domain"
 	"e-commerce/internal/dto/userDto"
+	"e-commerce/internal/repository"
+	"fmt"
 	"log"
 )
 
 type UserService struct {
+	UserRepo repository.UserRepository
 }
 
 func (userService UserService) findUserByEmail(email string) (*domain.User, error) {
@@ -17,7 +20,14 @@ func (userService UserService) findUserByEmail(email string) (*domain.User, erro
 func (userService UserService) RegisterUser(input userDto.RegisterUserDto) (token string, err error) {
 	log.Println(input)
 
-	return "the-generated-new-token", nil
+	user, err := userService.UserRepo.CreateUser(domain.User{
+		Email: input.Email, Password: input.Password, Phone: input.Phone,
+	})
+
+	// TODO: Implement proper token generation logic here, possibly using JWT or another secure method
+	token = fmt.Sprintf("%v-%v-%v-token", user.ID, user.Email, user.UserType)
+
+	return token, err
 }
 
 func (userService UserService) LoginUser(input userDto.LoginUserDto) (string, error) {

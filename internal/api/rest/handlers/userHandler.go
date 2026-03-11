@@ -3,6 +3,7 @@ package handlers
 import (
 	"e-commerce/internal/api/rest"
 	"e-commerce/internal/dto/userDto"
+	"e-commerce/internal/repository"
 	"e-commerce/internal/service"
 	"log"
 	"net/http"
@@ -18,7 +19,7 @@ func SetupUserRoutes(restHandler *rest.RestHandler) {
 	app := restHandler.App
 
 	handler := UserHandler{
-		userService: service.UserService{},
+		userService: service.UserService{UserRepo: repository.NewUserRepository(restHandler.DB)},
 	}
 
 	// Public endpoints
