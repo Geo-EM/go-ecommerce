@@ -9,4 +9,5 @@ type JwtClaims struct {
 	jwt.RegisteredClaims
 }
 
+// Ensure JwtClaims implements jwt.Claims interface at compile time
 var _ jwt.Claims = (*JwtClaims)(nil)
