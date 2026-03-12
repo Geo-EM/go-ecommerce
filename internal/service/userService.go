@@ -37,7 +37,7 @@ func (userService UserService) LoginUser(input userDto.LoginUserDto) (string, er
 
 	// TODO: Hashed password comparison
 	if err != nil || user.Password != input.Password {
-		return "", errors.New("Invalid credentials")
+		return "", errors.New("invalid credentials")
 	}
 
 	token := userService.generateToken(user)

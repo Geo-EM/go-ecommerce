@@ -6,13 +6,22 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func HashPassword(rawPassword string) (string, error) {
-	if len(rawPassword) < 8 {
-		return "", errors.New("password must be at least 8 characters")
+func validatePasswordLength(password string) error {
+	if len(password) < 8 {
+		return errors.New("password must be at least 8 characters")
 	}
 
-	if len(rawPassword) > 72 {
-		return "", errors.New("password must be less than 72 bytes")
+	if len(password) > 71 {
+		return errors.New("password must be less than 71 bytes/characters")
+	}
+
+	return nil
+}
+
+func HashPassword(rawPassword string) (string, error) {
+
+	if err := validatePasswordLength(rawPassword); err != nil {
+		return "", err
 	}
 
 	hash, err := bcrypt.GenerateFromPassword(
@@ -23,9 +32,14 @@ func HashPassword(rawPassword string) (string, error) {
 	return string(hash), err
 }
 
-func ValidatePassword(rawPassword, hashedPassword string) bool {
-	return bcrypt.CompareHashAndPassword(
-		[]byte(hashedPassword),
-		[]byte(rawPassword),
-	) == nil
+func ValidatePassword(rawPassword, hashedPassword string) error {
+	if err := validatePasswordLength(rawPassword); err != nil {
+		return err
+	}
+
+	if err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(rawPassword)); err != nil {
+		return errors.New("invalid credentials")
+	}
+
+	return nil
 }

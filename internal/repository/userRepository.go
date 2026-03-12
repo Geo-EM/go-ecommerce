@@ -33,7 +33,7 @@ func (userRepo userRepository) CreateUser(userInput domain.User) (domain.User, e
 	err := userRepo.db.Create(&newUser).Error
 	if err != nil {
 		log.Printf("Error creating user: %v\n", err)
-		return domain.User{}, errors.New("Failed to create user")
+		return domain.User{}, errors.New("failed to create user")
 	}
 
 	return newUser, nil
@@ -44,7 +44,7 @@ func (userRepo userRepository) FindUserByID(userId uint) (domain.User, error) {
 	err := userRepo.db.First(&user, userId).Error
 	if err != nil {
 		log.Printf("Error finding user by ID: %v\n", err)
-		return domain.User{}, errors.New("User not found")
+		return domain.User{}, errors.New("user not found")
 	}
 
 	return user, nil
@@ -55,7 +55,7 @@ func (userRepo userRepository) FindUserByEmail(email string) (domain.User, error
 	err := userRepo.db.First(&user, "email = ?", email).Error
 	if err != nil {
 		log.Printf("Error finding user by email: %v\n", err)
-		return domain.User{}, errors.New("User not found")
+		return domain.User{}, errors.New("user not found")
 	}
 
 	return user, nil
@@ -66,7 +66,7 @@ func (userRepo userRepository) UpdateUser(userId uint, userInput *domain.User) (
 	err := userRepo.db.Model(&existingUser).Clauses(clause.Returning{}).Where("id = ?", userId).Updates(userInput).Error
 	if err != nil {
 		log.Printf("Error updating user: %v\n", err)
-		return domain.User{}, errors.New("Failed to update user")
+		return domain.User{}, errors.New("failed to update user")
 	}
 
 	return existingUser, nil
@@ -76,7 +76,7 @@ func (userRepo userRepository) DeleteUser(userId uint) (bool, error) {
 	err := userRepo.db.Delete(&domain.User{}, userId).Error
 	if err != nil {
 		log.Printf("Error deleting user: %v\n", err)
-		return false, errors.New("Failed to delete user")
+		return false, errors.New("failed to delete user")
 	}
 
 	return true, nil

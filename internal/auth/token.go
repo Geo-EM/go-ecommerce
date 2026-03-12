@@ -10,11 +10,16 @@ import (
 
 type TokenService struct {
 	Secret string
+	Issuer string
 }
 
-func (t TokenService) GenerateToken(userID uint, email, role string) (string, error) {
+func (tokenService TokenService) GenerateToken(userID uint, email, role string) (string, error) {
 	if userID == 0 || email == "" || role == "" {
 		return "", errors.New("invalid user data")
+	}
+
+	if tokenService.Secret == "" || tokenService.Issuer == "" {
+		return "", errors.New("token service not configured")
 	}
 
 	now := time.Now()
@@ -25,7 +30,7 @@ func (t TokenService) GenerateToken(userID uint, email, role string) (string, er
 		Role:   role,
 		RegisteredClaims: jwt.RegisteredClaims{
 			Subject:   strconv.Itoa(int(userID)),
-			Issuer:    "my-api",
+			Issuer:    tokenService.Issuer,
 			IssuedAt:  jwt.NewNumericDate(now),
 			ExpiresAt: jwt.NewNumericDate(now.Add(7 * 24 * time.Hour)),
 		},
@@ -33,10 +38,14 @@ func (t TokenService) GenerateToken(userID uint, email, role string) (string, er
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS512, &claims)
 
-	return token.SignedString([]byte(t.Secret))
+	return token.SignedString([]byte(tokenService.Secret))
 }
 
-func (t TokenService) ValidateToken(tokenString string) (*JwtClaims, error) {
+func (tokenService TokenService) ValidateToken(tokenString string) (*JwtClaims, error) {
+
+	if tokenString == "" {
+		return nil, errors.New("token is empty")
+	}
 
 	claims := &JwtClaims{}
 
@@ -49,12 +58,16 @@ func (t TokenService) ValidateToken(tokenString string) (*JwtClaims, error) {
 				return nil, errors.New("unexpected signing method")
 			}
 
-			return []byte(t.Secret), nil
+			return []byte(tokenService.Secret), nil
 		},
 	)
 
 	if err != nil || !token.Valid {
 		return nil, errors.New("invalid token")
+	}
+
+	if claims.Issuer != tokenService.Issuer {
+		return nil, errors.New("invalid token issuer")
 	}
 
 	return claims, nil
