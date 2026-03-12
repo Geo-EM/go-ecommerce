@@ -3,6 +3,7 @@ package auth
 import (
 	"errors"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -46,6 +47,13 @@ func (tokenService TokenService) ValidateToken(tokenString string) (*JwtClaims, 
 	if tokenString == "" {
 		return nil, errors.New("token is empty")
 	}
+
+	tokenStrings := strings.Split(tokenString, " ")
+	if len(tokenStrings) != 2 || tokenStrings[0] != "Bearer" {
+		return nil, errors.New("invalid token format")
+	}
+
+	tokenString = tokenStrings[1]
 
 	claims := &JwtClaims{}
 
