@@ -4,35 +4,45 @@ import (
 	"e-commerce/internal/domain"
 	"e-commerce/internal/dto/userDto"
 	"e-commerce/internal/repository"
+	"errors"
 	"fmt"
-	"log"
 )
 
 type UserService struct {
 	UserRepo repository.UserRepository
 }
 
-func (userService UserService) findUserByEmail(email string) (*domain.User, error) {
-	log.Println(email)
-	return nil, nil
+func (UserService) generateToken(user *domain.User) string {
+	// TODO: Implement proper token generation logic here, possibly using JWT or another secure method
+	return fmt.Sprintf("%v-%v-%v-token", user.ID, user.Email, user.UserType)
 }
 
-func (userService UserService) RegisterUser(input userDto.RegisterUserDto) (token string, err error) {
-	log.Println(input)
+func (userService UserService) findUserByEmail(email string) (*domain.User, error) {
+	user, err := userService.UserRepo.FindUserByEmail(email)
+	return &user, err
+}
 
+func (userService UserService) RegisterUser(input userDto.RegisterUserDto) (string, error) {
+	// TODO: Hash the password before storing it in the database
 	user, err := userService.UserRepo.CreateUser(domain.User{
 		Email: input.Email, Password: input.Password, Phone: input.Phone,
 	})
 
-	// TODO: Implement proper token generation logic here, possibly using JWT or another secure method
-	token = fmt.Sprintf("%v-%v-%v-token", user.ID, user.Email, user.UserType)
-
+	token := userService.generateToken(&user)
 	return token, err
 }
 
 func (userService UserService) LoginUser(input userDto.LoginUserDto) (string, error) {
-	log.Println(input)
-	return "", nil
+	user, err := userService.findUserByEmail(input.Email)
+
+	// TODO: Hashed password comparison
+	if err != nil || user.Password != input.Password {
+		return "", errors.New("Invalid credentials")
+	}
+
+	token := userService.generateToken(user)
+
+	return token, err
 }
 
 func (userService UserService) GetVerificationCode(input any) (int, error) {

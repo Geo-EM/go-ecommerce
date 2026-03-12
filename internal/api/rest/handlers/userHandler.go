@@ -5,7 +5,6 @@ import (
 	"e-commerce/internal/dto/userDto"
 	"e-commerce/internal/repository"
 	"e-commerce/internal/service"
-	"log"
 	"net/http"
 
 	"github.com/gofiber/fiber/v3"
@@ -45,8 +44,8 @@ func SetupUserRoutes(restHandler *rest.RestHandler) {
 
 func (handler UserHandler) register(ctx fiber.Ctx) error {
 	userInput := userDto.RegisterUserDto{}
+
 	if err := ctx.Bind().Body(&userInput); err != nil {
-		log.Println(userInput)
 		return ctx.Status(http.StatusBadRequest).JSON(&fiber.Map{
 			"message": "Invalid inputs",
 		})
@@ -60,13 +59,30 @@ func (handler UserHandler) register(ctx fiber.Ctx) error {
 	}
 
 	return ctx.Status(http.StatusOK).JSON(&fiber.Map{
-		"token": token,
+		"message": "Registered successfully",
+		"token":   token,
 	})
 }
 
 func (handler UserHandler) login(ctx fiber.Ctx) error {
+	loginInput := userDto.LoginUserDto{}
+
+	if err := ctx.Bind().Body(&loginInput); err != nil {
+		return ctx.Status(http.StatusBadRequest).JSON(&fiber.Map{
+			"message": "Invalid inputs",
+		})
+	}
+
+	token, err := handler.userService.LoginUser(loginInput)
+	if err != nil {
+		return ctx.Status(http.StatusUnauthorized).JSON(&fiber.Map{
+			"message": err.Error(),
+		})
+	}
+
 	return ctx.Status(http.StatusOK).JSON(&fiber.Map{
-		"message": "Logged in",
+		"message": "Logged in successfully",
+		"token":   token,
 	})
 }
 
