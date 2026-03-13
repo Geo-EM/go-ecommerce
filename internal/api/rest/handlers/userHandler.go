@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"e-commerce/internal/api/rest"
+	"e-commerce/internal/api/rest/response"
 	"e-commerce/internal/dto/userDto"
 	"e-commerce/internal/repository"
 	"e-commerce/internal/service"
@@ -18,7 +19,10 @@ func SetupUserRoutes(restHandler *rest.RestHandler) {
 	app := restHandler.App
 
 	handler := UserHandler{
-		userService: service.UserService{UserRepo: repository.NewUserRepository(restHandler.DB)},
+		userService: service.UserService{
+			UserRepo:     repository.NewUserRepository(restHandler.DB),
+			TokenService: *restHandler.TokenService,
+		},
 	}
 
 	// Public endpoints
@@ -42,99 +46,85 @@ func SetupUserRoutes(restHandler *rest.RestHandler) {
 
 }
 
-func (handler UserHandler) register(ctx fiber.Ctx) error {
-	userInput := userDto.RegisterUserDto{}
+func (uh UserHandler) register(ctx fiber.Ctx) error {
+	input := userDto.RegisterUserDto{}
 
-	if err := ctx.Bind().Body(&userInput); err != nil {
-		return ctx.Status(http.StatusBadRequest).JSON(&fiber.Map{
-			"message": "Invalid inputs",
-		})
+	if err := ctx.Bind().Body(&input); err != nil {
+		return response.BadRequest(ctx, "Invalid input")
 	}
 
-	token, err := handler.userService.RegisterUser(userInput)
+	token, err := uh.userService.RegisterUser(input)
 	if err != nil {
-		return ctx.Status(http.StatusBadRequest).JSON(&fiber.Map{
-			"message": err.Error(),
-		})
+		return response.BadRequest(ctx, err.Error())
 	}
 
-	return ctx.Status(http.StatusOK).JSON(&fiber.Map{
-		"message": "Registered successfully",
-		"token":   token,
-	})
+	return response.Created(ctx, "Registered successfully", fiber.Map{"token": token})
 }
 
-func (handler UserHandler) login(ctx fiber.Ctx) error {
-	loginInput := userDto.LoginUserDto{}
+func (uh UserHandler) login(ctx fiber.Ctx) error {
+	input := userDto.LoginUserDto{}
 
-	if err := ctx.Bind().Body(&loginInput); err != nil {
-		return ctx.Status(http.StatusBadRequest).JSON(&fiber.Map{
-			"message": "Invalid inputs",
-		})
+	if err := ctx.Bind().Body(&input); err != nil {
+		return response.BadRequest(ctx, "Invalid input")
 	}
 
-	token, err := handler.userService.LoginUser(loginInput)
+	token, err := uh.userService.LoginUser(input)
 	if err != nil {
-		return ctx.Status(http.StatusUnauthorized).JSON(&fiber.Map{
-			"message": err.Error(),
-		})
+		return response.Unauthorized(ctx, "Invalid credentials")
 	}
 
-	return ctx.Status(http.StatusOK).JSON(&fiber.Map{
-		"message": "Logged in successfully",
-		"token":   token,
-	})
+	return response.OK(ctx, "Logged in successfully", fiber.Map{"token": token})
 }
 
-func (handler UserHandler) getVerificationCode(ctx fiber.Ctx) error {
+func (uh UserHandler) getVerificationCode(ctx fiber.Ctx) error {
 	return ctx.Status(http.StatusOK).JSON(&fiber.Map{
 		"message": "Succeed!",
 	})
 }
 
-func (handler UserHandler) verify(ctx fiber.Ctx) error {
+func (uh UserHandler) verify(ctx fiber.Ctx) error {
 	return ctx.Status(http.StatusOK).JSON(&fiber.Map{
 		"message": "Succeed!",
 	})
 }
 
-func (handler UserHandler) getProfile(ctx fiber.Ctx) error {
+func (uh UserHandler) getProfile(ctx fiber.Ctx) error {
 	return ctx.Status(http.StatusOK).JSON(&fiber.Map{
 		"message": "Succeed!",
 	})
 }
 
-func (handler UserHandler) createProfile(ctx fiber.Ctx) error {
+func (uh UserHandler) createProfile(ctx fiber.Ctx) error {
 	return ctx.Status(http.StatusOK).JSON(&fiber.Map{
 		"message": "Succeed!",
 	})
 }
 
-func (handler UserHandler) getCart(ctx fiber.Ctx) error {
+func (uh UserHandler) getCart(ctx fiber.Ctx) error {
 	return ctx.Status(http.StatusOK).JSON(&fiber.Map{
 		"message": "Succeed!",
 	})
 }
 
-func (handler UserHandler) updateCart(ctx fiber.Ctx) error {
+func (uh UserHandler) updateCart(ctx fiber.Ctx) error {
 	return ctx.Status(http.StatusOK).JSON(&fiber.Map{
 		"message": "Succeed!",
 	})
 }
 
-func (handler UserHandler) getOrders(ctx fiber.Ctx) error {
+func (uh UserHandler) getOrders(ctx fiber.Ctx) error {
 	return ctx.Status(http.StatusOK).JSON(&fiber.Map{
 		"message": "Succeed!",
 	})
 }
 
-func (handler UserHandler) getOrderById(ctx fiber.Ctx) error {
+func (uh UserHandler) getOrderById(ctx fiber.Ctx) error {
 	return ctx.Status(http.StatusOK).JSON(&fiber.Map{
 		"message": "Succeed!",
 	})
 }
 
-func (handler UserHandler) becomeSeller(ctx fiber.Ctx) error {
+func (uh UserHandler) becomeSeller(ctx fiber.Ctx) error {
 	return ctx.Status(http.StatusOK).JSON(&fiber.Map{
 		"message": "Succeed!",
 	})

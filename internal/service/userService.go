@@ -1,90 +1,106 @@
 package service
 
 import (
+	"e-commerce/internal/auth"
 	"e-commerce/internal/domain"
 	"e-commerce/internal/dto/userDto"
 	"e-commerce/internal/repository"
 	"errors"
-	"fmt"
 )
 
 type UserService struct {
-	UserRepo repository.UserRepository
+	UserRepo     repository.UserRepository
+	TokenService auth.TokenService
 }
 
-func (UserService) generateToken(user *domain.User) string {
-	// TODO: Implement proper token generation logic here, possibly using JWT or another secure method
-	return fmt.Sprintf("%v-%v-%v-token", user.ID, user.Email, user.UserType)
-}
-
-func (userService UserService) findUserByEmail(email string) (*domain.User, error) {
-	user, err := userService.UserRepo.FindUserByEmail(email)
+func (us UserService) findUserByEmail(email string) (*domain.User, error) {
+	user, err := us.UserRepo.FindUserByEmail(email)
 	return &user, err
 }
 
-func (userService UserService) RegisterUser(input userDto.RegisterUserDto) (string, error) {
-	// TODO: Hash the password before storing it in the database
-	user, err := userService.UserRepo.CreateUser(domain.User{
-		Email: input.Email, Password: input.Password, Phone: input.Phone,
-	})
+func (us *UserService) RegisterUser(input userDto.RegisterUserDto) (string, error) {
+	// Hash password
+	hashedPassword, err := auth.HashPassword(input.Password)
+	if err != nil {
+		return "", err
+	}
 
-	token := userService.generateToken(&user)
-	return token, err
+	// Create user
+	user, err := us.UserRepo.CreateUser(domain.User{
+		Email:    input.Email,
+		Password: hashedPassword,
+		Phone:    input.Phone,
+	})
+	if err != nil {
+		return "", err
+	}
+
+	token, err := us.TokenService.GenerateToken(user.ID, user.Email, user.UserType)
+	if err != nil {
+		return "", err
+	}
+
+	return token, nil
 }
 
-func (userService UserService) LoginUser(input userDto.LoginUserDto) (string, error) {
-	user, err := userService.findUserByEmail(input.Email)
-
-	// TODO: Hashed password comparison
-	if err != nil || user.Password != input.Password {
+func (us *UserService) LoginUser(input userDto.LoginUserDto) (string, error) {
+	user, err := us.findUserByEmail(input.Email)
+	if err != nil {
 		return "", errors.New("invalid credentials")
 	}
 
-	token := userService.generateToken(user)
+	if err := auth.ValidatePassword(input.Password, user.Password); err != nil {
+		return "", errors.New("invalid credentials")
+	}
 
-	return token, err
+	token, err := us.TokenService.GenerateToken(user.ID, user.Email, user.UserType)
+	if err != nil {
+		return "", err
+	}
+
+	return token, nil
 }
 
-func (userService UserService) GetVerificationCode(input any) (int, error) {
+func (us UserService) GetVerificationCode(input any) (int, error) {
 	return 0, nil
 }
 
-func (userService UserService) VerifyUser(userId uint, code int) (bool, error) {
+func (us UserService) VerifyUser(userId uint, code int) (bool, error) {
 	return false, nil
 }
 
-func (userService UserService) CreateUserProfile(userId uint, input any) (bool, error) {
+func (us UserService) CreateUserProfile(userId uint, input any) (bool, error) {
 	return false, nil
 }
 
-func (userService UserService) GetUserProfile(userId uint) (*domain.User, error) {
+func (us UserService) GetUserProfile(userId uint) (*domain.User, error) {
 	return nil, nil
 }
 
-func (userService UserService) UpdateUserProfile(userId uint, input any) (bool, error) {
+func (us UserService) UpdateUserProfile(userId uint, input any) (bool, error) {
 	return false, nil
 }
 
-func (userService UserService) UpdateUserCart(user domain.User, input any) (bool, error) {
+func (us UserService) UpdateUserCart(user domain.User, input any) (bool, error) {
 	return false, nil
 }
 
-func (userService UserService) GetUserCart(userId uint) ([]interface{}, error) {
+func (us UserService) GetUserCart(userId uint) ([]interface{}, error) {
 	return nil, nil
 }
 
-func (userService UserService) CreateOrder(user domain.User, input any) (bool, error) {
+func (us UserService) CreateOrder(user domain.User, input any) (bool, error) {
 	return false, nil
 }
 
-func (userService UserService) GetUserOrders(user domain.User) ([]interface{}, error) {
+func (us UserService) GetUserOrders(user domain.User) ([]interface{}, error) {
 	return nil, nil
 }
 
-func (userService UserService) GetUserOrderById(userId uint, orderId uint) (interface{}, error) {
+func (us UserService) GetUserOrderById(userId uint, orderId uint) (interface{}, error) {
 	return nil, nil
 }
 
-func (userService UserService) BecomeSeller(userId uint, input any) (bool, error) {
+func (us UserService) BecomeSeller(userId uint, input any) (bool, error) {
 	return false, nil
 }

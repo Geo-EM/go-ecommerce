@@ -10,7 +10,8 @@ import (
 type AppConfig struct {
 	Host       string
 	ServerPort string
-	Dsn        string
+
+	Dsn string
 
 	JWTSecret string
 	JWTIssuer string
