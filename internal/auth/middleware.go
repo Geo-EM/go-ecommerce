@@ -6,7 +6,7 @@ import (
 	"github.com/gofiber/fiber/v3"
 )
 
-func (tokenService TokenService) Authorize(ctx fiber.Ctx) error {
+func (t TokenService) Authorize(ctx fiber.Ctx) error {
 
 	authHeader := ctx.Get("Authorization")
 
@@ -14,15 +14,20 @@ func (tokenService TokenService) Authorize(ctx fiber.Ctx) error {
 		return fiber.ErrUnauthorized
 	}
 
-	token := strings.TrimPrefix(authHeader, "Bearer ")
+	parts := strings.SplitN(authHeader, " ", 2)
 
-	claims, err := tokenService.ValidateToken(token)
-	if err != nil {
+	if len(parts) != 2 || parts[0] != "Bearer" {
 		return fiber.ErrUnauthorized
 	}
 
-	ctx.Locals("userID", claims.UserID)
-	ctx.Locals("role", claims.Role)
+	tokenString := parts[1]
+
+	claims, err := t.ValidateToken(tokenString)
+	if err != nil || claims.UserID <= 0 {
+		return fiber.ErrUnauthorized
+	}
+
+	ctx.Locals("user", claims)
 
 	return ctx.Next()
 }
