@@ -25,24 +25,26 @@ func SetupUserRoutes(restHandler *rest.RestHandler) {
 		},
 	}
 
+	pubRoutes := app.Group("/auth")
 	// Public endpoints
-	app.Post("/register", handler.register)
-	app.Post("/login", handler.login)
+	pubRoutes.Post("/register", handler.register)
+	pubRoutes.Post("/login", handler.login)
 
+	privRoutes := app.Group("/users", restHandler.TokenService.Authorize)
 	// Private endpoints
-	app.Post("/verify", handler.verify)
-	app.Get("/verify", handler.getVerificationCode)
+	privRoutes.Post("/verify", handler.verify)
+	privRoutes.Get("/verify", handler.getVerificationCode)
 
-	app.Post("/profile", handler.createProfile)
-	app.Get("/profile", handler.getProfile)
+	privRoutes.Post("/profile", handler.createProfile)
+	privRoutes.Get("/profile", handler.getProfile)
 
-	app.Post("/cart", handler.updateCart)
-	app.Get("/cart", handler.getCart)
+	privRoutes.Post("/cart", handler.updateCart)
+	privRoutes.Get("/cart", handler.getCart)
 
-	app.Get("/order", handler.getOrders)
-	app.Get("/order/:id", handler.getOrderById)
+	privRoutes.Get("/order", handler.getOrders)
+	privRoutes.Get("/order/:id", handler.getOrderById)
 
-	app.Post("/become-seller", handler.becomeSeller)
+	privRoutes.Post("/become-seller", handler.becomeSeller)
 
 }
 
@@ -58,7 +60,7 @@ func (uh UserHandler) register(ctx fiber.Ctx) error {
 		return response.BadRequest(ctx, err.Error())
 	}
 
-	return response.Created(ctx, "Registered successfully", fiber.Map{"token": token})
+	return response.Created(ctx, fiber.Map{"token": token}, "Registered successfully")
 }
 
 func (uh UserHandler) login(ctx fiber.Ctx) error {
@@ -73,7 +75,7 @@ func (uh UserHandler) login(ctx fiber.Ctx) error {
 		return response.Unauthorized(ctx, "Invalid credentials")
 	}
 
-	return response.OK(ctx, "Logged in successfully", fiber.Map{"token": token})
+	return response.OK(ctx, fiber.Map{"token": token}, "Logged in successfully")
 }
 
 func (uh UserHandler) getVerificationCode(ctx fiber.Ctx) error {

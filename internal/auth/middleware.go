@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"e-commerce/internal/api/rest/response"
 	"strings"
 
 	"github.com/gofiber/fiber/v3"
@@ -11,13 +12,13 @@ func (t *TokenService) Authorize(ctx fiber.Ctx) error {
 	authHeader := ctx.Get("Authorization")
 
 	if authHeader == "" {
-		return fiber.ErrUnauthorized
+		return response.Unauthorized(ctx)
 	}
 
 	parts := strings.SplitN(authHeader, " ", 2)
 
 	if len(parts) != 2 || parts[0] != "Bearer" {
-		return fiber.ErrUnauthorized
+		return response.Unauthorized(ctx)
 	}
 
 	tokenString := parts[1]
@@ -29,5 +30,5 @@ func (t *TokenService) Authorize(ctx fiber.Ctx) error {
 		return ctx.Next()
 	}
 
-	return fiber.ErrUnauthorized
+	return response.Unauthorized(ctx)
 }
