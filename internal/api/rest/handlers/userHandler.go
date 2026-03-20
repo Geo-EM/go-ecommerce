@@ -91,9 +91,17 @@ func (uh UserHandler) verify(ctx fiber.Ctx) error {
 }
 
 func (uh UserHandler) getProfile(ctx fiber.Ctx) error {
-	return ctx.Status(http.StatusOK).JSON(&fiber.Map{
-		"message": "Succeed!",
-	})
+	userClaims, err := uh.userService.TokenService.GetCurrentUser(ctx)
+	if err != nil {
+		return response.Unauthorized(ctx, "Unauthorized, consider logging in again")
+	}
+
+	user, err := uh.userService.GetUserProfile(userClaims.UserID)
+	if err != nil {
+		return response.Unauthorized(ctx, "Unauthorized, consider logging in again")
+	}
+
+	return response.RespondSuccess(ctx, http.StatusOK, fiber.Map{"user": user})
 }
 
 func (uh UserHandler) createProfile(ctx fiber.Ctx) error {

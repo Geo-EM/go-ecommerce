@@ -74,7 +74,11 @@ func (us UserService) CreateUserProfile(userId uint, input any) (bool, error) {
 }
 
 func (us UserService) GetUserProfile(userId uint) (*domain.User, error) {
-	return nil, nil
+	user, err := us.UserRepo.FindUserByID(userId)
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
 }
 
 func (us UserService) UpdateUserProfile(userId uint, input any) (bool, error) {

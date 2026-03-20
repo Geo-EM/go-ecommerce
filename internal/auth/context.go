@@ -11,9 +11,10 @@ func (t *TokenService) GetCurrentUser(ctx fiber.Ctx) (*JwtClaims, error) {
 	}
 
 	claims, ok := user.(*JwtClaims)
-	if !ok || claims.UserID <= 0 {
-		return nil, fiber.ErrUnauthorized
+	if ok && claims.UserID > 0 {
+		return claims, nil
 	}
 
-	return claims, nil
+	return nil, fiber.ErrUnauthorized
+
 }
