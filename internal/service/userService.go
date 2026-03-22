@@ -18,6 +18,11 @@ func (us UserService) findUserByEmail(email string) (*domain.User, error) {
 	return &user, err
 }
 
+func (us UserService) isUserVerified(userId uint) bool {
+	user, err := us.UserRepo.FindUserByID(userId)
+	return err == nil && user.Verified
+}
+
 func (us *UserService) RegisterUser(input userDto.RegisterUserDto) (string, error) {
 	// Hash password
 	hashedPassword, err := auth.HashPassword(input.Password)
@@ -61,7 +66,16 @@ func (us *UserService) LoginUser(input userDto.LoginUserDto) (string, error) {
 	return token, nil
 }
 
-func (us UserService) GetVerificationCode(input any) (int, error) {
+func (us UserService) GetVerificationCode(userId uint) (uint, error) {
+	// If user already verified, ignore
+	if us.isUserVerified(userId) {
+		return 0, errors.New("user already verified")
+	}
+
+	// Generate verification code
+
+	// Update user verification code
+
 	return 0, nil
 }
 

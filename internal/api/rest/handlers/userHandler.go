@@ -6,6 +6,7 @@ import (
 	"e-commerce/internal/dto/userDto"
 	"e-commerce/internal/repository"
 	"e-commerce/internal/service"
+	"fmt"
 	"net/http"
 
 	"github.com/gofiber/fiber/v3"
@@ -79,6 +80,18 @@ func (uh UserHandler) login(ctx fiber.Ctx) error {
 }
 
 func (uh UserHandler) getVerificationCode(ctx fiber.Ctx) error {
+	userClaims, err := uh.userService.TokenService.GetCurrentUser(ctx)
+
+	// Create verification code
+	code, err := uh.userService.GetVerificationCode(userClaims.UserID)
+	fmt.Println(code)
+
+	// Update user to be verified
+
+	if err != nil {
+		return response.Unauthorized(ctx, "Unauthorized, consider logging in again")
+	}
+
 	return ctx.Status(http.StatusOK).JSON(&fiber.Map{
 		"message": "Succeed!",
 	})
