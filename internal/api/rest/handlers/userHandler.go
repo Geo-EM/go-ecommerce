@@ -95,9 +95,21 @@ func (uh UserHandler) getVerificationCode(ctx fiber.Ctx) error {
 }
 
 func (uh UserHandler) verify(ctx fiber.Ctx) error {
-	return ctx.Status(fiber.StatusOK).JSON(&fiber.Map{
-		"message": "Succeed!",
-	})
+	userClaims, err := uh.userService.TokenService.GetCurrentUser(ctx)
+	if err != nil {
+		return response.Unauthorized(ctx, "Unauthorized, consider logging in again")
+	}
+
+	input := userDto.VerifyCodeUserDto{}
+	if err := ctx.Bind().Body(&input); err != nil {
+		return response.BadRequest(ctx, "Invalid input")
+	}
+
+	if err := uh.userService.VerifyUserVerificationCode(userClaims.UserID, input.VerificationCode); err != nil {
+		return response.BadRequest(ctx, "Invalid or expired verification code")
+	}
+
+	return response.OK(ctx, nil, "Verified Successfully")
 }
 
 func (uh UserHandler) getProfile(ctx fiber.Ctx) error {

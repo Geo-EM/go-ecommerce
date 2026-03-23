@@ -103,8 +103,30 @@ func (us UserService) GetVerificationCode(userId uint) (uint, error) {
 	return code, nil
 }
 
-func (us UserService) VerifyUser(userId uint, code int) (bool, error) {
-	return false, nil
+func (us UserService) VerifyUserVerificationCode(userId uint, code uint) error {
+	if us.isUserVerified(userId) {
+		return errors.New("user already verified")
+	}
+
+	user, err := us.UserRepo.FindUserByID(userId)
+	if err != nil {
+		return err
+	}
+
+	if !time.Now().Before(user.VerificationCodeExpiry) {
+		return errors.New("verification code expired")
+	}
+
+	if user.VerificationCode == code {
+		updatedUser := domain.User{Verified: true}
+		_, err := us.UserRepo.UpdateUser(userId, updatedUser)
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+
+	return errors.New("invalid verification code")
 }
 
 func (us UserService) CreateUserProfile(userId uint, input any) (bool, error) {
