@@ -6,6 +6,7 @@ import (
 	"e-commerce/internal/dto/userDto"
 	"e-commerce/internal/repository"
 	"errors"
+	"time"
 )
 
 type UserService struct {
@@ -13,6 +14,7 @@ type UserService struct {
 	TokenService auth.TokenService
 }
 
+// Private methods
 func (us UserService) findUserByEmail(email string) (*domain.User, error) {
 	user, err := us.UserRepo.FindUserByEmail(email)
 	return &user, err
@@ -23,6 +25,19 @@ func (us UserService) isUserVerified(userId uint) bool {
 	return err == nil && user.Verified
 }
 
+func (us UserService) updateUserVerificationCode(userId uint, code uint) error {
+	exp := time.Now().Add(30 * time.Minute)
+	updatedUser := domain.User{VerificationCode: code, VerificationCodeExpiry: exp}
+	_, err := us.UserRepo.UpdateUser(userId, updatedUser)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+//
+
+// Public methods
 func (us *UserService) RegisterUser(input userDto.RegisterUserDto) (string, error) {
 	// Hash password
 	hashedPassword, err := auth.HashPassword(input.Password)
@@ -73,10 +88,19 @@ func (us UserService) GetVerificationCode(userId uint) (uint, error) {
 	}
 
 	// Generate verification code
+	code, err := auth.GenerateVerificationCode()
+	if err != nil {
+		return 0, err
+	}
 
 	// Update user verification code
+	if err := us.updateUserVerificationCode(userId, code); err != nil {
+		return 0, err
+	}
 
-	return 0, nil
+	// TODO: Send sms with verification code to user phone
+
+	return code, nil
 }
 
 func (us UserService) VerifyUser(userId uint, code int) (bool, error) {

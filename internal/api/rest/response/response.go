@@ -1,8 +1,6 @@
 package response
 
 import (
-	"maps"
-
 	"github.com/gofiber/fiber/v3"
 )
 
@@ -29,9 +27,11 @@ func RespondSuccess(ctx fiber.Ctx, status int, data fiber.Map, message ...string
 		"status":  "success",
 		"message": msg,
 	}
+
 	if data != nil {
-		maps.Copy(res, data)
+		res["data"] = data
 	}
+
 	return ctx.Status(status).JSON(res)
 }
 
@@ -43,6 +43,14 @@ func BadRequest(ctx fiber.Ctx, message ...string) error {
 		msg = message[0]
 	}
 	return RespondError(ctx, fiber.StatusBadRequest, msg)
+}
+
+func InternalServerError(ctx fiber.Ctx, message ...string) error {
+	msg := "Failed"
+	if len(message) > 0 && message[0] != "" {
+		msg = message[0]
+	}
+	return RespondError(ctx, fiber.StatusInternalServerError, msg)
 }
 
 func Unauthorized(ctx fiber.Ctx, message ...string) error {

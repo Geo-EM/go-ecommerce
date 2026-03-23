@@ -6,8 +6,6 @@ import (
 	"e-commerce/internal/dto/userDto"
 	"e-commerce/internal/repository"
 	"e-commerce/internal/service"
-	"fmt"
-	"net/http"
 
 	"github.com/gofiber/fiber/v3"
 )
@@ -81,24 +79,23 @@ func (uh UserHandler) login(ctx fiber.Ctx) error {
 
 func (uh UserHandler) getVerificationCode(ctx fiber.Ctx) error {
 	userClaims, err := uh.userService.TokenService.GetCurrentUser(ctx)
-
-	// Create verification code
-	code, err := uh.userService.GetVerificationCode(userClaims.UserID)
-	fmt.Println(code)
-
-	// Update user to be verified
-
 	if err != nil {
 		return response.Unauthorized(ctx, "Unauthorized, consider logging in again")
 	}
 
-	return ctx.Status(http.StatusOK).JSON(&fiber.Map{
-		"message": "Succeed!",
-	})
+	// Create verification code
+	code, err := uh.userService.GetVerificationCode(userClaims.UserID)
+	if err != nil {
+		return response.BadRequest(ctx, "Failed to send verification code")
+	}
+
+	// Update user to be verified
+
+	return response.OK(ctx, fiber.Map{"code": code}, "Verification code sent successfully")
 }
 
 func (uh UserHandler) verify(ctx fiber.Ctx) error {
-	return ctx.Status(http.StatusOK).JSON(&fiber.Map{
+	return ctx.Status(fiber.StatusOK).JSON(&fiber.Map{
 		"message": "Succeed!",
 	})
 }
@@ -114,41 +111,41 @@ func (uh UserHandler) getProfile(ctx fiber.Ctx) error {
 		return response.Unauthorized(ctx, "Unauthorized, consider logging in again")
 	}
 
-	return response.RespondSuccess(ctx, http.StatusOK, fiber.Map{"user": user})
+	return response.OK(ctx, fiber.Map{"user": user})
 }
 
 func (uh UserHandler) createProfile(ctx fiber.Ctx) error {
-	return ctx.Status(http.StatusOK).JSON(&fiber.Map{
+	return ctx.Status(fiber.StatusOK).JSON(&fiber.Map{
 		"message": "Succeed!",
 	})
 }
 
 func (uh UserHandler) getCart(ctx fiber.Ctx) error {
-	return ctx.Status(http.StatusOK).JSON(&fiber.Map{
+	return ctx.Status(fiber.StatusOK).JSON(&fiber.Map{
 		"message": "Succeed!",
 	})
 }
 
 func (uh UserHandler) updateCart(ctx fiber.Ctx) error {
-	return ctx.Status(http.StatusOK).JSON(&fiber.Map{
+	return ctx.Status(fiber.StatusOK).JSON(&fiber.Map{
 		"message": "Succeed!",
 	})
 }
 
 func (uh UserHandler) getOrders(ctx fiber.Ctx) error {
-	return ctx.Status(http.StatusOK).JSON(&fiber.Map{
+	return ctx.Status(fiber.StatusOK).JSON(&fiber.Map{
 		"message": "Succeed!",
 	})
 }
 
 func (uh UserHandler) getOrderById(ctx fiber.Ctx) error {
-	return ctx.Status(http.StatusOK).JSON(&fiber.Map{
+	return ctx.Status(fiber.StatusOK).JSON(&fiber.Map{
 		"message": "Succeed!",
 	})
 }
 
 func (uh UserHandler) becomeSeller(ctx fiber.Ctx) error {
-	return ctx.Status(http.StatusOK).JSON(&fiber.Map{
+	return ctx.Status(fiber.StatusOK).JSON(&fiber.Map{
 		"message": "Succeed!",
 	})
 }

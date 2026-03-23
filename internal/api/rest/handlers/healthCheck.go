@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"e-commerce/internal/api/rest"
-	"net/http"
 
 	"github.com/gofiber/fiber/v3"
 )
@@ -14,7 +13,7 @@ func SetupHealthCheckRoute(restHandler *rest.RestHandler) {
 }
 
 func handler(ctx fiber.Ctx) error {
-	return ctx.Status(http.StatusOK).JSON(&fiber.Map{
+	return ctx.Status(fiber.StatusOK).JSON(&fiber.Map{
 		"message": "Working!",
 	})
 }

@@ -1,5 +1,7 @@
 package auth
 
+import "e-commerce/internal/utils"
+
 func GenerateVerificationCode() (uint, error) {
-	return 0, nil
+	return utils.GenerateRandomNumber(6)
 }
