@@ -183,6 +183,6 @@ func (us UserService) GetUserOrderById(userId uint, orderId uint) (interface{}, 
 	return nil, nil
 }
 
-func (us UserService) BecomeSeller(userId uint, input any) (bool, error) {
-	return false, nil
+func (us UserService) BecomeSeller(userId uint, input userDto.SellerDto) (string, error) {
+	return "", nil
 }

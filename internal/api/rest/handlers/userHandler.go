@@ -155,7 +155,20 @@ func (uh UserHandler) getOrderById(ctx fiber.Ctx) error {
 }
 
 func (uh UserHandler) becomeSeller(ctx fiber.Ctx) error {
-	return ctx.Status(fiber.StatusOK).JSON(&fiber.Map{
-		"message": "Succeed!",
-	})
+	userClaims, err := uh.userService.TokenService.GetCurrentUser(ctx)
+	if err != nil {
+		return response.Unauthorized(ctx, "Unauthorized, consider logging in again")
+	}
+
+	input := userDto.SellerDto{}
+	if err := ctx.Bind().Body(&input); err != nil {
+		return response.BadRequest(ctx, "Invalid inputs")
+	}
+
+	token, err := uh.userService.BecomeSeller(userClaims.UserID, input)
+	if err != nil {
+		return response.BadRequest(ctx)
+	}
+
+	return response.OK(ctx, fiber.Map{"token": token}, "Become seller successfully")
 }
