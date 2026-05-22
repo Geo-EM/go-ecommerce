@@ -167,7 +167,7 @@ func (uh UserHandler) becomeSeller(ctx fiber.Ctx) error {
 
 	token, err := uh.userService.BecomeSeller(userClaims.UserID, input)
 	if err != nil {
-		return response.BadRequest(ctx)
+		return response.BadRequest(ctx, "Failed to become seller")
 	}
 
 	return response.OK(ctx, fiber.Map{"token": token}, "Become seller successfully")

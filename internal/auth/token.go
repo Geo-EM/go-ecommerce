@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"e-commerce/internal/domain"
 	"errors"
 	"strconv"
 	"time"
@@ -34,7 +35,7 @@ func NewTokenService(secret, issuer string, ttl time.Duration) (*TokenService, e
 	}, nil
 }
 
-func (t TokenService) GenerateToken(userID uint, email, role string) (string, error) {
+func (t TokenService) GenerateToken(userID uint, email string, role domain.UserTypeEnum) (string, error) {
 
 	if userID == 0 || email == "" || role == "" {
 		return "", errors.New("invalid user data")

@@ -22,7 +22,7 @@ func StartServer(config config.AppConfig) {
 	if err != nil {
 		log.Fatalln("Error connecting to database:", err)
 	}
-	if err := db.AutoMigrate(&domain.User{}); err != nil {
+	if err := db.AutoMigrate(&domain.User{}, &domain.BankAccount{}); err != nil {
 		log.Fatalln("Error migrating database:", err)
 	}
 

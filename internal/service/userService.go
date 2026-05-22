@@ -97,7 +97,7 @@ func (us UserService) GetVerificationCode(userId uint) error {
 
 	// If user already verified, ignore
 	if us.isUserVerified(user) {
-		return errors.New("user already verified")
+		return errors.New("already verified")
 	}
 
 	// Generate verification code
@@ -184,5 +184,41 @@ func (us UserService) GetUserOrderById(userId uint, orderId uint) (interface{}, 
 }
 
 func (us UserService) BecomeSeller(userId uint, input userDto.SellerDto) (string, error) {
-	return "", nil
+	user, err := us.UserRepo.FindUserByID(userId)
+	if err != nil {
+		return "", err
+	}
+
+	if !us.isUserVerified(user) {
+		return "", errors.New("not verified")
+	}
+
+	if user.UserType == domain.UserType.SELLER {
+		return "", errors.New("already a seller")
+	}
+
+	seller, err := us.UserRepo.UpdateUser(userId, domain.User{
+		UserType: domain.UserType.SELLER, FirstName: input.FirstName, LastName: input.LastName, Phone: input.PhoneNumber,
+	})
+	if err != nil {
+		return "", err
+	}
+
+	token, err := us.TokenService.GenerateToken(user.ID, user.Email, seller.UserType)
+	if err != nil {
+		return "", err
+	}
+
+	account := domain.BankAccount{
+		UserId:            userId,
+		BankAccountNumber: input.BankAccountNumber,
+		SwiftCode:         input.SwiftCode,
+		PaymentType:       input.PaymentType,
+	}
+
+	if _, err = us.UserRepo.CreateBankAccount(account); err != nil {
+		return "", err
+	}
+
+	return token, nil
 }

@@ -10,10 +10,15 @@ import (
 
 type UserRepository interface {
 	CreateUser(user domain.User) (domain.User, error)
+	UpdateUser(userId uint, user domain.User) (domain.User, error)
+
 	FindUserByID(userId uint) (domain.User, error)
 	FindUserByEmail(email string) (domain.User, error)
-	UpdateUser(userId uint, user domain.User) (domain.User, error)
+	FindAllUsers() ([]domain.User, error)
+
 	DeleteUser(userId uint) (bool, error)
+
+	CreateBankAccount(bankAccount domain.BankAccount) (domain.BankAccount, error)
 }
 
 type userRepository struct {
@@ -37,6 +42,16 @@ func (userRepo userRepository) CreateUser(userInput domain.User) (domain.User, e
 	return newUser, nil
 }
 
+func (userRepo userRepository) UpdateUser(userId uint, userInput domain.User) (domain.User, error) {
+	var existingUser domain.User
+	err := userRepo.db.Model(&existingUser).Clauses(clause.Returning{}).Where("id = ?", userId).Updates(userInput).Error
+	if err != nil {
+		return domain.User{}, errors.New("failed to update user")
+	}
+
+	return existingUser, nil
+}
+
 func (userRepo userRepository) FindUserByID(userId uint) (domain.User, error) {
 	var user domain.User
 	err := userRepo.db.First(&user, userId).Error
@@ -57,14 +72,14 @@ func (userRepo userRepository) FindUserByEmail(email string) (domain.User, error
 	return user, nil
 }
 
-func (userRepo userRepository) UpdateUser(userId uint, userInput domain.User) (domain.User, error) {
-	var existingUser domain.User
-	err := userRepo.db.Model(&existingUser).Clauses(clause.Returning{}).Where("id = ?", userId).Updates(userInput).Error
+func (userRepo userRepository) FindAllUsers() ([]domain.User, error) {
+	var users []domain.User
+	err := userRepo.db.Find(&users).Error
 	if err != nil {
-		return domain.User{}, errors.New("failed to update user")
+		return []domain.User{}, errors.New("failed to fetch users")
 	}
 
-	return existingUser, nil
+	return users, nil
 }
 
 func (userRepo userRepository) DeleteUser(userId uint) (bool, error) {
@@ -74,4 +89,15 @@ func (userRepo userRepository) DeleteUser(userId uint) (bool, error) {
 	}
 
 	return true, nil
+}
+
+func (userRepo *userRepository) CreateBankAccount(bankAccountInput domain.BankAccount) (domain.BankAccount, error) {
+	var newBankAccount domain.BankAccount = bankAccountInput
+
+	err := userRepo.db.Create(&newBankAccount).Error
+	if err != nil {
+		return domain.BankAccount{}, errors.New("failed to create bank account")
+	}
+
+	return newBankAccount, nil
 }
