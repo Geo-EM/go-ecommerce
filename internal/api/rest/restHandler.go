@@ -1,6 +1,7 @@
 package rest
 
 import (
+	"e-commerce/config"
 	"e-commerce/internal/auth"
 
 	"github.com/gofiber/fiber/v3"
@@ -11,4 +12,5 @@ type RestHandler struct {
 	App          *fiber.App
 	DB           *gorm.DB
 	TokenService *auth.TokenService
+	AppConfig    *config.AppConfig
 }

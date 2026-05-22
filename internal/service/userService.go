@@ -1,17 +1,21 @@
 package service
 
 import (
+	"e-commerce/config"
 	"e-commerce/internal/auth"
 	"e-commerce/internal/domain"
 	"e-commerce/internal/dto/userDto"
 	"e-commerce/internal/repository"
+	"e-commerce/pkg/notification"
 	"errors"
+	"fmt"
 	"time"
 )
 
 type UserService struct {
 	UserRepo     repository.UserRepository
 	TokenService auth.TokenService
+	AppConfig    config.AppConfig
 }
 
 // Private methods
@@ -20,9 +24,13 @@ func (us UserService) findUserByEmail(email string) (*domain.User, error) {
 	return &user, err
 }
 
-func (us UserService) isUserVerified(userId uint) bool {
+func (us UserService) isUserVerifiedById(userId uint) bool {
 	user, err := us.UserRepo.FindUserByID(userId)
 	return err == nil && user.Verified
+}
+
+func (us UserService) isUserVerified(user domain.User) bool {
+	return user.Verified
 }
 
 func (us UserService) updateUserVerificationCode(userId uint, code uint) error {
@@ -81,30 +89,38 @@ func (us *UserService) LoginUser(input userDto.LoginUserDto) (string, error) {
 	return token, nil
 }
 
-func (us UserService) GetVerificationCode(userId uint) (uint, error) {
+func (us UserService) GetVerificationCode(userId uint) error {
+	user, err := us.UserRepo.FindUserByID(userId)
+	if err != nil {
+		return err
+	}
+
 	// If user already verified, ignore
-	if us.isUserVerified(userId) {
-		return 0, errors.New("user already verified")
+	if us.isUserVerified(user) {
+		return errors.New("user already verified")
 	}
 
 	// Generate verification code
 	code, err := auth.GenerateVerificationCode()
 	if err != nil {
-		return 0, err
+		return err
 	}
 
 	// Update user verification code
 	if err := us.updateUserVerificationCode(userId, code); err != nil {
-		return 0, err
+		return err
 	}
 
-	// TODO: Send sms with verification code to user phone
+	notificationClient := notification.NewNotificationClient(us.AppConfig)
+	if err := notificationClient.SendSms(user.Phone, "Your verification code is: "+fmt.Sprint(code)); err != nil {
+		return err
+	}
 
-	return code, nil
+	return nil
 }
 
 func (us UserService) VerifyUserVerificationCode(userId uint, code uint) error {
-	if us.isUserVerified(userId) {
+	if us.isUserVerifiedById(userId) {
 		return errors.New("user already verified")
 	}
 

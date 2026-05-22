@@ -40,6 +40,7 @@ func StartServer(config config.AppConfig) {
 		App:          app,
 		DB:           db,
 		TokenService: tokenService,
+		AppConfig:    &config,
 	})
 
 	if err := app.Listen(config.Host + ":" + config.ServerPort); err != nil {

@@ -21,6 +21,7 @@ func SetupUserRoutes(restHandler *rest.RestHandler) {
 		userService: service.UserService{
 			UserRepo:     repository.NewUserRepository(restHandler.DB),
 			TokenService: *restHandler.TokenService,
+			AppConfig:    *restHandler.AppConfig,
 		},
 	}
 
@@ -83,15 +84,12 @@ func (uh UserHandler) getVerificationCode(ctx fiber.Ctx) error {
 		return response.Unauthorized(ctx, "Unauthorized, consider logging in again")
 	}
 
-	// Create verification code
-	code, err := uh.userService.GetVerificationCode(userClaims.UserID)
-	if err != nil {
+	// Create verification code adn send to user
+	if err := uh.userService.GetVerificationCode(userClaims.UserID); err != nil {
 		return response.BadRequest(ctx, "Failed to send verification code")
 	}
 
-	// Update user to be verified
-
-	return response.OK(ctx, fiber.Map{"code": code}, "Verification code sent successfully")
+	return response.OK(ctx, nil, "Verification code sent successfully")
 }
 
 func (uh UserHandler) verify(ctx fiber.Ctx) error {
