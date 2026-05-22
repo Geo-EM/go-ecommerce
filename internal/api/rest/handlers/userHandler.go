@@ -66,7 +66,7 @@ func (uh UserHandler) login(ctx fiber.Ctx) error {
 	input := userDto.LoginUserDto{}
 
 	if err := ctx.Bind().Body(&input); err != nil {
-		return response.BadRequest(ctx, "Invalid input")
+		return response.BadRequest(ctx, "Invalid credentials")
 	}
 
 	token, err := uh.userService.LoginUser(input)
@@ -102,7 +102,7 @@ func (uh UserHandler) verify(ctx fiber.Ctx) error {
 
 	input := userDto.VerifyCodeUserDto{}
 	if err := ctx.Bind().Body(&input); err != nil {
-		return response.BadRequest(ctx, "Invalid input")
+		return response.BadRequest(ctx, "Invalid or expired verification code")
 	}
 
 	if err := uh.userService.VerifyUserVerificationCode(userClaims.UserID, input.VerificationCode); err != nil {

@@ -12,13 +12,13 @@ func (t *TokenService) Authorize(ctx fiber.Ctx) error {
 	authHeader := ctx.Get("Authorization")
 
 	if authHeader == "" {
-		return response.Unauthorized(ctx)
+		return response.Unauthorized(ctx, "Unauthorized, consider logging in again")
 	}
 
 	parts := strings.SplitN(authHeader, " ", 2)
 
 	if len(parts) != 2 || parts[0] != "Bearer" {
-		return response.Unauthorized(ctx)
+		return response.Unauthorized(ctx, "Unauthorized, consider logging in again")
 	}
 
 	tokenString := parts[1]
@@ -30,5 +30,5 @@ func (t *TokenService) Authorize(ctx fiber.Ctx) error {
 		return ctx.Next()
 	}
 
-	return response.Unauthorized(ctx)
+	return response.Unauthorized(ctx, "Unauthorized, consider logging in again")
 }

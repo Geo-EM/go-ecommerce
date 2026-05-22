@@ -9,7 +9,7 @@ import (
 func SetupHealthCheckRoute(restHandler *rest.RestHandler) {
 	app := restHandler.App
 
-	app.Get("/health-check", handler)
+	app.Get("/health", handler)
 }
 
 func handler(ctx fiber.Ctx) error {
