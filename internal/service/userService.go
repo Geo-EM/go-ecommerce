@@ -112,7 +112,9 @@ func (us UserService) GetVerificationCode(userId uint) error {
 	}
 
 	notificationClient := notification.NewNotificationClient(us.AppConfig)
-	if err := notificationClient.SendSms(user.Phone, "Your verification code is: "+fmt.Sprint(code)); err != nil {
+	msg := fmt.Sprintf("(go-commerce): Your verification code is: %v", code)
+
+	if err := notificationClient.SendSms(user.Phone, msg); err != nil {
 		return err
 	}
 

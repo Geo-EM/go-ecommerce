@@ -15,6 +15,11 @@ type AppConfig struct {
 
 	JWTSecret string
 	JWTIssuer string
+
+	TwilioAuthToken       string
+	TwilioAccountSID      string
+	TwilioFromPhoneNumber string
+	// TwilioVerifyServiceSID string
 }
 
 func SetupEnv() (conf AppConfig, err error) {
@@ -50,6 +55,24 @@ func SetupEnv() (conf AppConfig, err error) {
 		return AppConfig{}, errors.New("JWT_ISSUER env variable not specified")
 	}
 
+	// Twilio
+	twilioAuthToken := os.Getenv("TWILIO_AUTH_TOKEN")
+	if twilioAuthToken == "" {
+		return AppConfig{}, errors.New("TWILIO_AUTH_TOKEN env variable not specified")
+	}
+	twilioAccountSID := os.Getenv("TWILIO_ACCOUNT_SID")
+	if twilioAccountSID == "" {
+		return AppConfig{}, errors.New("TWILIO_ACCOUNT_SID env variable not specified")
+	}
+	twilioFromPhoneNumber := os.Getenv("TWILIO_FROM_PHONE_NUMBER")
+	if twilioFromPhoneNumber == "" {
+		return AppConfig{}, errors.New("TWILIO_FROM_PHONE_NUMBER env variable not specified")
+	}
+	// twilioVerifyServiceSID := os.Getenv("TWILIO_VERIFY_SERVICE_SID")
+	// if twilioVerifyServiceSID == "" {
+	// 	return AppConfig{}, errors.New("TWILIO_VERIFY_SERVICE_SID env variable not specified")
+	// }
+
 	return AppConfig{
 		Host:       host,
 		ServerPort: httpPort,
@@ -58,5 +81,10 @@ func SetupEnv() (conf AppConfig, err error) {
 
 		JWTSecret: jwtSecret,
 		JWTIssuer: jwtIssuer,
+
+		TwilioAuthToken:       twilioAuthToken,
+		TwilioAccountSID:      twilioAccountSID,
+		TwilioFromPhoneNumber: twilioFromPhoneNumber,
+		// TwilioVerifyServiceSID: twilioVerifyServiceSID,
 	}, nil
 }
