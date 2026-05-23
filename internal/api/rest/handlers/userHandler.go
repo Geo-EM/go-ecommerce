@@ -81,12 +81,12 @@ func (uh UserHandler) login(ctx fiber.Ctx) error {
 func (uh UserHandler) getVerificationCode(ctx fiber.Ctx) error {
 	userClaims, err := uh.userService.TokenService.GetCurrentUser(ctx)
 	if err != nil {
-		return response.Unauthorized(ctx, "Unauthorized, consider logging in again")
+		return response.Unauthorized(ctx, err.Error())
 	}
 
 	// Create verification code adn send to user
 	if err := uh.userService.GetVerificationCode(userClaims.UserID); err != nil {
-		return response.BadRequest(ctx, "Failed to send verification code")
+		return response.BadRequest(ctx, err.Error())
 	}
 
 	return response.OK(ctx, nil, "Verification code sent successfully")
@@ -95,16 +95,16 @@ func (uh UserHandler) getVerificationCode(ctx fiber.Ctx) error {
 func (uh UserHandler) verify(ctx fiber.Ctx) error {
 	userClaims, err := uh.userService.TokenService.GetCurrentUser(ctx)
 	if err != nil {
-		return response.Unauthorized(ctx, "Unauthorized, consider logging in again")
+		return response.Unauthorized(ctx, err.Error())
 	}
 
 	input := userDto.VerifyCodeUserDto{}
 	if err := ctx.Bind().Body(&input); err != nil {
-		return response.BadRequest(ctx, "Invalid or expired verification code")
+		return response.BadRequest(ctx, err.Error())
 	}
 
 	if err := uh.userService.VerifyUserVerificationCode(userClaims.UserID, input.VerificationCode); err != nil {
-		return response.BadRequest(ctx, "Invalid or expired verification code")
+		return response.BadRequest(ctx, err.Error())
 	}
 
 	return response.OK(ctx, nil, "Verified Successfully")
@@ -113,12 +113,12 @@ func (uh UserHandler) verify(ctx fiber.Ctx) error {
 func (uh UserHandler) getProfile(ctx fiber.Ctx) error {
 	userClaims, err := uh.userService.TokenService.GetCurrentUser(ctx)
 	if err != nil {
-		return response.Unauthorized(ctx, "Unauthorized, consider logging in again")
+		return response.Unauthorized(ctx, err.Error())
 	}
 
 	user, err := uh.userService.GetUserProfile(userClaims.UserID)
 	if err != nil {
-		return response.Unauthorized(ctx, "Unauthorized, consider logging in again")
+		return response.Unauthorized(ctx, err.Error())
 	}
 
 	return response.OK(ctx, fiber.Map{"user": user})
@@ -127,7 +127,7 @@ func (uh UserHandler) getProfile(ctx fiber.Ctx) error {
 func (uh UserHandler) becomeSeller(ctx fiber.Ctx) error {
 	userClaims, err := uh.userService.TokenService.GetCurrentUser(ctx)
 	if err != nil {
-		return response.Unauthorized(ctx, "Unauthorized, consider logging in again")
+		return response.Unauthorized(ctx, err.Error())
 	}
 
 	input := userDto.SellerDto{}
@@ -137,7 +137,7 @@ func (uh UserHandler) becomeSeller(ctx fiber.Ctx) error {
 
 	token, err := uh.userService.BecomeSeller(userClaims.UserID, input)
 	if err != nil {
-		return response.BadRequest(ctx, "Failed to become seller")
+		return response.BadRequest(ctx, err.Error())
 	}
 
 	return response.OK(ctx, fiber.Map{"token": token}, "Become seller successfully")

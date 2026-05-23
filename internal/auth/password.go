@@ -29,7 +29,11 @@ func HashPassword(rawPassword string) (string, error) {
 		bcrypt.DefaultCost,
 	)
 
-	return string(hash), err
+	if err != nil {
+		return "", errors.New("Something went wrong")
+	}
+
+	return string(hash), nil
 }
 
 func ValidatePassword(rawPassword, hashedPassword string) error {
@@ -38,7 +42,7 @@ func ValidatePassword(rawPassword, hashedPassword string) error {
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(rawPassword)); err != nil {
-		return errors.New("invalid credentials")
+		return errors.New("Invalid credentials")
 	}
 
 	return nil

@@ -74,11 +74,11 @@ func (us *UserService) RegisterUser(input userDto.RegisterUserDto) (string, erro
 func (us *UserService) LoginUser(input userDto.LoginUserDto) (string, error) {
 	user, err := us.findUserByEmail(input.Email)
 	if err != nil {
-		return "", errors.New("invalid credentials")
+		return "", errors.New("Invalid credentials")
 	}
 
 	if err := auth.ValidatePassword(input.Password, user.Password); err != nil {
-		return "", errors.New("invalid credentials")
+		return "", errors.New("Invalid credentials")
 	}
 
 	token, err := us.TokenService.GenerateToken(user.ID, user.Email, user.UserType)
@@ -97,13 +97,13 @@ func (us UserService) GetVerificationCode(userId uint) error {
 
 	// If user already verified, ignore
 	if us.isUserVerified(user) {
-		return errors.New("already verified")
+		return errors.New("Already verified")
 	}
 
 	// Generate verification code
 	code, err := auth.GenerateVerificationCode()
 	if err != nil {
-		return err
+		return errors.New("Failed to send verification code")
 	}
 
 	// Update user verification code
@@ -115,7 +115,7 @@ func (us UserService) GetVerificationCode(userId uint) error {
 	msg := fmt.Sprintf("(go-commerce): Your verification code is: %v", code)
 
 	if err := notificationClient.SendSms(user.Phone, msg); err != nil {
-		return err
+		return errors.New("Failed to send verification code")
 	}
 
 	return nil
@@ -123,7 +123,7 @@ func (us UserService) GetVerificationCode(userId uint) error {
 
 func (us UserService) VerifyUserVerificationCode(userId uint, code uint) error {
 	if us.isUserVerifiedById(userId) {
-		return errors.New("user already verified")
+		return errors.New("Already verified")
 	}
 
 	user, err := us.UserRepo.FindUserByID(userId)
@@ -132,7 +132,7 @@ func (us UserService) VerifyUserVerificationCode(userId uint, code uint) error {
 	}
 
 	if !time.Now().Before(user.VerificationCodeExpiry) {
-		return errors.New("verification code expired")
+		return errors.New("Invalid or expired verification code")
 	}
 
 	if user.VerificationCode == code {
@@ -144,43 +144,7 @@ func (us UserService) VerifyUserVerificationCode(userId uint, code uint) error {
 		return nil
 	}
 
-	return errors.New("invalid verification code")
-}
-
-func (us UserService) CreateUserProfile(userId uint, input any) (bool, error) {
-	return false, nil
-}
-
-func (us UserService) GetUserProfile(userId uint) (*domain.User, error) {
-	user, err := us.UserRepo.FindUserByID(userId)
-	if err != nil {
-		return nil, err
-	}
-	return &user, nil
-}
-
-func (us UserService) UpdateUserProfile(userId uint, input any) (bool, error) {
-	return false, nil
-}
-
-func (us UserService) UpdateUserCart(user domain.User, input any) (bool, error) {
-	return false, nil
-}
-
-func (us UserService) GetUserCart(userId uint) ([]interface{}, error) {
-	return nil, nil
-}
-
-func (us UserService) CreateOrder(user domain.User, input any) (bool, error) {
-	return false, nil
-}
-
-func (us UserService) GetUserOrders(user domain.User) ([]interface{}, error) {
-	return nil, nil
-}
-
-func (us UserService) GetUserOrderById(userId uint, orderId uint) (interface{}, error) {
-	return nil, nil
+	return errors.New("Invalid or expired verification code")
 }
 
 func (us UserService) BecomeSeller(userId uint, input userDto.SellerDto) (string, error) {
@@ -190,11 +154,11 @@ func (us UserService) BecomeSeller(userId uint, input userDto.SellerDto) (string
 	}
 
 	if !us.isUserVerified(user) {
-		return "", errors.New("not verified")
+		return "", errors.New("Please verify your account first")
 	}
 
 	if user.UserType == domain.UserType.SELLER {
-		return "", errors.New("already a seller")
+		return "", errors.New("Already a seller")
 	}
 
 	seller, err := us.UserRepo.UpdateUser(userId, domain.User{
@@ -221,4 +185,40 @@ func (us UserService) BecomeSeller(userId uint, input userDto.SellerDto) (string
 	}
 
 	return token, nil
+}
+
+func (us UserService) GetUserProfile(userId uint) (*domain.User, error) {
+	user, err := us.UserRepo.FindUserByID(userId)
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
+
+func (us UserService) CreateUserProfile(userId uint, input any) (bool, error) {
+	return false, nil
+}
+
+func (us UserService) UpdateUserProfile(userId uint, input any) (bool, error) {
+	return false, nil
+}
+
+func (us UserService) UpdateUserCart(user domain.User, input any) (bool, error) {
+	return false, nil
+}
+
+func (us UserService) GetUserCart(userId uint) ([]interface{}, error) {
+	return nil, nil
+}
+
+func (us UserService) CreateOrder(user domain.User, input any) (bool, error) {
+	return false, nil
+}
+
+func (us UserService) GetUserOrders(user domain.User) ([]interface{}, error) {
+	return nil, nil
+}
+
+func (us UserService) GetUserOrderById(userId uint, orderId uint) (interface{}, error) {
+	return nil, nil
 }

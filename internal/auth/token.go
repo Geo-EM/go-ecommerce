@@ -38,7 +38,7 @@ func NewTokenService(secret, issuer string, ttl time.Duration) (*TokenService, e
 func (t TokenService) GenerateToken(userID uint, email string, role domain.UserTypeEnum) (string, error) {
 
 	if userID == 0 || email == "" || role == "" {
-		return "", errors.New("invalid user data")
+		return "", errors.New("Invalid inputs")
 	}
 
 	now := time.Now()
@@ -57,8 +57,12 @@ func (t TokenService) GenerateToken(userID uint, email string, role domain.UserT
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS512, &claims)
+	signedString, err := token.SignedString([]byte(t.Secret))
 
-	return token.SignedString([]byte(t.Secret))
+	if err != nil {
+		return "", errors.New("Something went wrong")
+	}
+	return signedString, nil
 }
 
 func (t TokenService) ValidateToken(tokenString string) (*JwtClaims, error) {
