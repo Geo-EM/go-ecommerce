@@ -14,14 +14,14 @@ type UserHandler struct {
 	userService service.UserService
 }
 
-func SetupUserRoutes(restHandler *rest.RestHandler) {
-	app := restHandler.App
+func SetupUserRoutes(rh *rest.RestHandler) {
+	app := rh.App
 
 	handler := UserHandler{
 		userService: service.UserService{
-			UserRepo:     repository.NewUserRepository(restHandler.DB),
-			TokenService: *restHandler.TokenService,
-			AppConfig:    *restHandler.AppConfig,
+			UserRepo:     repository.NewUserRepository(rh.DB),
+			TokenService: *rh.TokenService,
+			AppConfig:    *rh.AppConfig,
 		},
 	}
 
@@ -30,7 +30,7 @@ func SetupUserRoutes(restHandler *rest.RestHandler) {
 	pubRoutes.Post("/register", handler.register)
 	pubRoutes.Post("/login", handler.login)
 
-	privRoutes := app.Group("/users", restHandler.TokenService.Authorize)
+	privRoutes := app.Group("/users", rh.TokenService.Authorize)
 	// Private endpoints
 	privRoutes.Post("/verify", handler.verify)
 	privRoutes.Get("/verify", handler.getVerificationCode)
@@ -124,6 +124,25 @@ func (uh UserHandler) getProfile(ctx fiber.Ctx) error {
 	return response.OK(ctx, fiber.Map{"user": user})
 }
 
+func (uh UserHandler) becomeSeller(ctx fiber.Ctx) error {
+	userClaims, err := uh.userService.TokenService.GetCurrentUser(ctx)
+	if err != nil {
+		return response.Unauthorized(ctx, "Unauthorized, consider logging in again")
+	}
+
+	input := userDto.SellerDto{}
+	if err := ctx.Bind().Body(&input); err != nil {
+		return response.BadRequest(ctx, "Invalid inputs")
+	}
+
+	token, err := uh.userService.BecomeSeller(userClaims.UserID, input)
+	if err != nil {
+		return response.BadRequest(ctx, "Failed to become seller")
+	}
+
+	return response.OK(ctx, fiber.Map{"token": token}, "Become seller successfully")
+}
+
 func (uh UserHandler) createProfile(ctx fiber.Ctx) error {
 	return ctx.Status(fiber.StatusOK).JSON(&fiber.Map{
 		"message": "Succeed!",
@@ -152,23 +171,4 @@ func (uh UserHandler) getOrderById(ctx fiber.Ctx) error {
 	return ctx.Status(fiber.StatusOK).JSON(&fiber.Map{
 		"message": "Succeed!",
 	})
-}
-
-func (uh UserHandler) becomeSeller(ctx fiber.Ctx) error {
-	userClaims, err := uh.userService.TokenService.GetCurrentUser(ctx)
-	if err != nil {
-		return response.Unauthorized(ctx, "Unauthorized, consider logging in again")
-	}
-
-	input := userDto.SellerDto{}
-	if err := ctx.Bind().Body(&input); err != nil {
-		return response.BadRequest(ctx, "Invalid inputs")
-	}
-
-	token, err := uh.userService.BecomeSeller(userClaims.UserID, input)
-	if err != nil {
-		return response.BadRequest(ctx, "Failed to become seller")
-	}
-
-	return response.OK(ctx, fiber.Map{"token": token}, "Become seller successfully")
 }
