@@ -73,6 +73,11 @@ func (ch CatalogHandler) getProductById(ctx fiber.Ctx) error {
 }
 
 func (ch CatalogHandler) createProduct(ctx fiber.Ctx) error {
+	userClaims, err := uh.userService.TokenService.GetCurrentUser(ctx)
+	if err != nil {
+		return response.Unauthorized(ctx, err.Error())
+	}
+
 	input := catalogDto.CreateProductDto{}
 
 	if err := ctx.Bind().Body(&input); err != nil {

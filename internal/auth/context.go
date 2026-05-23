@@ -1,13 +1,15 @@
 package auth
 
 import (
+	"errors"
+
 	"github.com/gofiber/fiber/v3"
 )
 
 func (t *TokenService) GetCurrentUser(ctx fiber.Ctx) (*JwtClaims, error) {
 	user := ctx.Locals("user")
 	if user == nil {
-		return nil, fiber.ErrUnauthorized
+		return nil, errors.New("Unauthorized, consider logging in again")
 	}
 
 	claims, ok := user.(*JwtClaims)
@@ -15,6 +17,6 @@ func (t *TokenService) GetCurrentUser(ctx fiber.Ctx) (*JwtClaims, error) {
 		return claims, nil
 	}
 
-	return nil, fiber.ErrUnauthorized
+	return nil, errors.New("Unauthorized, consider logging in again")
 
 }
