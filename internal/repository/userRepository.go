@@ -16,7 +16,7 @@ type UserRepository interface {
 	FindUserByEmail(email string) (domain.User, error)
 	FindAllUsers() ([]domain.User, error)
 
-	DeleteUser(userId uint) (bool, error)
+	DeleteUserById(userId uint) (bool, error)
 
 	CreateBankAccount(bankAccount domain.BankAccount) (domain.BankAccount, error)
 }
@@ -82,7 +82,7 @@ func (userRepo userRepository) FindAllUsers() ([]domain.User, error) {
 	return users, nil
 }
 
-func (userRepo userRepository) DeleteUser(userId uint) (bool, error) {
+func (userRepo userRepository) DeleteUserById(userId uint) (bool, error) {
 	err := userRepo.db.Delete(&domain.User{}, userId).Error
 	if err != nil {
 		return false, errors.New("Failed to delete user")
