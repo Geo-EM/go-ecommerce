@@ -1,7 +1,7 @@
 package userDto
 
 type LoginUserDto struct {
-	Email    string `json:"email" validate:"required,email"`
+	Email    string `json:"email"`
 	Password string `json:"password"`
 }
 

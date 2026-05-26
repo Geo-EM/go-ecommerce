@@ -3,8 +3,10 @@ package handlers
 import (
 	"e-commerce/internal/api/rest"
 	"e-commerce/internal/api/rest/response"
+	"e-commerce/internal/dto/catalogDto"
 	"e-commerce/internal/repository"
 	"e-commerce/internal/service"
+	"strconv"
 
 	"github.com/gofiber/fiber/v3"
 )
@@ -154,14 +156,20 @@ func (ch CatalogHandler) createCategory(ctx fiber.Ctx) error {
 	return response.Created(ctx, fiber.Map{"category": category}, "Created successfully")
 }
 
-func (ch CatalogHandler) updateCategoryById(ctx fiber.Ctx) error {
-	input := catalogDto.UpdateCategoryDto{}
+func (ch CatalogHandler) updateCategory(ctx fiber.Ctx) error {
+	idParam := ctx.Params("id")
 
+	id, err := strconv.ParseUint(idParam, 10, 64)
+	if err != nil {
+		return response.BadRequest(ctx, "Failed to update category")
+	}
+
+	input := catalogDto.UpdateCategoryDto{}
 	if err := ctx.Bind().Body(&input); err != nil {
 		return response.BadRequest(ctx, "Invalid input")
 	}
 
-	category, err := ch.catalogService.UpdateCategoryById(input)
+	category, err := ch.catalogService.UpdateCategory(uint(id), input)
 	if err != nil {
 		return response.BadRequest(ctx, err.Error())
 	}

@@ -15,7 +15,7 @@ type CatalogRepository interface {
 	FindCategoryById(cid uint) (domain.Category, error)
 	FindAllCategories() ([]domain.Category, error)
 
-	DeleteCategoryById(cid uint) (bool, error)
+	DeleteCategory(cid uint) (bool, error)
 }
 
 type catalogRepository struct {
@@ -79,7 +79,7 @@ func (catalogRepo catalogRepository) FindAllCategories() ([]domain.Category, err
 	return categories, nil
 }
 
-func (catalogRepo catalogRepository) DeleteCategoryById(catId uint) (bool, error) {
+func (catalogRepo catalogRepository) DeleteCategory(catId uint) (bool, error) {
 	err := catalogRepo.db.Delete(&domain.Category{}, catId).Error
 	if err != nil {
 		return false, errors.New("Failed to delete category")
