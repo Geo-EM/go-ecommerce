@@ -43,3 +43,15 @@ func (cs *CatalogService) UpdateCategory(cid uint, input catalogDto.UpdateCatego
 
 	return category, nil
 }
+
+func (cs *CatalogService) GetCategoryById(cid uint) (domain.Category, error) {
+	return cs.CatalogRepo.FindCategoryById(cid)
+}
+
+func (cs *CatalogService) GetAllCategories() ([]domain.Category, error) {
+	return cs.CatalogRepo.FindAllCategories()
+}
+
+func (cs *CatalogService) DeleteCategory(cid uint) error {
+	return cs.CatalogRepo.DeleteCategory(cid)
+}

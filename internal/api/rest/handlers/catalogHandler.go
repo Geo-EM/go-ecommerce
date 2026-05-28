@@ -6,7 +6,7 @@ import (
 	"e-commerce/internal/dto/catalogDto"
 	"e-commerce/internal/repository"
 	"e-commerce/internal/service"
-	"strconv"
+	"e-commerce/internal/utils"
 
 	"github.com/gofiber/fiber/v3"
 )
@@ -29,8 +29,8 @@ func SetupCatalogRoutes(rh *rest.RestHandler) {
 	pubRoutes := app.Group("/products")
 	// Public endpoints
 	// Products
-	pubRoutes.Get("/", handler.getProducts)
-	pubRoutes.Get("/:id", handler.getProductById)
+	// pubRoutes.Get("/", handler.getProducts)
+	// pubRoutes.Get("/:id", handler.getProductById)
 
 	// Categories
 	pubRoutes.Get("/categories", handler.getCategories)
@@ -39,90 +39,88 @@ func SetupCatalogRoutes(rh *rest.RestHandler) {
 	sellerRoutes := app.Group("/seller", rh.TokenService.AuthorizeSeller)
 	// Private endpoints
 	// Products
-	// sellerRoutes.Get("/products", handler.getProducts)
-	// sellerRoutes.Get("/products/:id", handler.getProductById)
-	sellerRoutes.Post("/products", handler.createProduct)
-	sellerRoutes.Patch("/products/:id", handler.updateProductById)
-	sellerRoutes.Delete("/products/:id", handler.deleteProductById)
+	// sellerRoutes.Post("/products", handler.createProduct)
+	// sellerRoutes.Patch("/products/:id", handler.updateProductById)
+	// sellerRoutes.Delete("/products/:id", handler.deleteProductById)
 
 	// Categories
 	sellerRoutes.Post("/categories", handler.createCategory)
-	sellerRoutes.Patch("/categories/:id", handler.updateCategoryById)
-	sellerRoutes.Delete("/categories/:id", handler.deleteCategoryById)
+	sellerRoutes.Patch("/categories/:id", handler.updateCategory)
+	sellerRoutes.Delete("/categories/:id", handler.deleteCategory)
 
 }
 
 // Products
 
-func (ch CatalogHandler) getProducts(ctx fiber.Ctx) error {
-	products, err := ch.catalogService.GetProducts()
-	if err != nil {
-		return response.BadRequest(ctx, err.Error())
-	}
+// func (ch CatalogHandler) getProducts(ctx fiber.Ctx) error {
+// 	products, err := ch.catalogService.GetProducts()
+// 	if err != nil {
+// 		return response.BadRequest(ctx, err.Error())
+// 	}
 
-	return response.OK(ctx, fiber.Map{"products": products}, "Fetched successfully")
-}
+// 	return response.OK(ctx, fiber.Map{"products": products}, "Fetched successfully")
+// }
 
-func (ch CatalogHandler) getProductById(ctx fiber.Ctx) error {
-	id := ctx.Params("id")
+// func (ch CatalogHandler) getProductById(ctx fiber.Ctx) error {
+// 	id := ctx.Params("id")
 
-	product, err := ch.catalogService.GetProductById(id)
-	if err != nil {
-		return response.BadRequest(ctx, err.Error())
-	}
+// 	product, err := ch.catalogService.GetProductById(id)
+// 	if err != nil {
+// 		return response.BadRequest(ctx, err.Error())
+// 	}
 
-	return response.OK(ctx, fiber.Map{"product": product}, "Fetched successfully")
-}
+// 	return response.OK(ctx, fiber.Map{"product": product}, "Fetched successfully")
+// }
 
-func (ch CatalogHandler) createProduct(ctx fiber.Ctx) error {
-	userClaims, err := uh.userService.TokenService.GetCurrentUser(ctx)
-	if err != nil {
-		return response.Unauthorized(ctx, err.Error())
-	}
+// func (ch CatalogHandler) createProduct(ctx fiber.Ctx) error {
+// 	userClaims, err := uh.userService.TokenService.GetCurrentUser(ctx)
+// 	if err != nil {
+// 		return response.Unauthorized(ctx, err.Error())
+// 	}
 
-	input := catalogDto.CreateProductDto{}
+// 	input := catalogDto.CreateProductDto{}
 
-	if err := ctx.Bind().Body(&input); err != nil {
-		return response.BadRequest(ctx, "Invalid input")
-	}
+// 	if err := ctx.Bind().Body(&input); err != nil {
+// 		return response.BadRequest(ctx, "Invalid input")
+// 	}
 
-	product, err := ch.catalogService.CreateProduct(input)
-	if err != nil {
-		return response.BadRequest(ctx, err.Error())
-	}
+// 	product, err := ch.catalogService.CreateProduct(input)
+// 	if err != nil {
+// 		return response.BadRequest(ctx, err.Error())
+// 	}
 
-	return response.Created(ctx, fiber.Map{"product": product}, "Created successfully")
-}
+// 	return response.Created(ctx, fiber.Map{"product": product}, "Created successfully")
+// }
 
-func (ch CatalogHandler) updateProductById(ctx fiber.Ctx) error {
-	input := catalogDto.UpdateProductDto{}
+// func (ch CatalogHandler) updateProductById(ctx fiber.Ctx) error {
+// 	input := catalogDto.UpdateProductDto{}
 
-	if err := ctx.Bind().Body(&input); err != nil {
-		return response.BadRequest(ctx, "Invalid input")
-	}
+// 	if err := ctx.Bind().Body(&input); err != nil {
+// 		return response.BadRequest(ctx, "Invalid input")
+// 	}
 
-	product, err := ch.catalogService.UpdateProductById(input)
-	if err != nil {
-		return response.BadRequest(ctx, err.Error())
-	}
+// 	product, err := ch.catalogService.UpdateProductById(input)
+// 	if err != nil {
+// 		return response.BadRequest(ctx, err.Error())
+// 	}
 
-	return response.OK(ctx, fiber.Map{"product": product}, "Updated successfully")
-}
+// 	return response.OK(ctx, fiber.Map{"product": product}, "Updated successfully")
+// }
 
-func (ch CatalogHandler) deleteProductById(ctx fiber.Ctx) error {
-	id := ctx.Params("id")
+// func (ch CatalogHandler) deleteProductById(ctx fiber.Ctx) error {
+// 	id := ctx.Params("id")
 
-	if err := ch.catalogService.DeleteProductById(id); err != nil {
-		return response.BadRequest(ctx, err.Error())
-	}
+// 	if err := ch.catalogService.DeleteProductById(id); err != nil {
+// 		return response.BadRequest(ctx, err.Error())
+// 	}
 
-	return response.OK(ctx, nil, "Deleted successfully")
-}
+// 	return response.OK(ctx, nil, "Deleted successfully")
+// }
 
 // Categories
 
 func (ch CatalogHandler) getCategories(ctx fiber.Ctx) error {
-	categories, err := ch.catalogService.GetCategories()
+	categories, err := ch.catalogService.GetAllCategories()
 	if err != nil {
 		return response.BadRequest(ctx, err.Error())
 	}
@@ -131,7 +129,12 @@ func (ch CatalogHandler) getCategories(ctx fiber.Ctx) error {
 }
 
 func (ch CatalogHandler) getCategoryById(ctx fiber.Ctx) error {
-	id := ctx.Params("id")
+	idParam := ctx.Params("id")
+
+	id, err := utils.ParseStringToUint(idParam)
+	if err != nil {
+		return response.BadRequest(ctx, "Invalid ID")
+	}
 
 	category, err := ch.catalogService.GetCategoryById(id)
 	if err != nil {
@@ -159,9 +162,9 @@ func (ch CatalogHandler) createCategory(ctx fiber.Ctx) error {
 func (ch CatalogHandler) updateCategory(ctx fiber.Ctx) error {
 	idParam := ctx.Params("id")
 
-	id, err := strconv.ParseUint(idParam, 10, 64)
+	id, err := utils.ParseStringToUint(idParam)
 	if err != nil {
-		return response.BadRequest(ctx, "Failed to update category")
+		return response.BadRequest(ctx, "Invalid ID")
 	}
 
 	input := catalogDto.UpdateCategoryDto{}
@@ -169,7 +172,7 @@ func (ch CatalogHandler) updateCategory(ctx fiber.Ctx) error {
 		return response.BadRequest(ctx, "Invalid input")
 	}
 
-	category, err := ch.catalogService.UpdateCategory(uint(id), input)
+	category, err := ch.catalogService.UpdateCategory(id, input)
 	if err != nil {
 		return response.BadRequest(ctx, err.Error())
 	}
@@ -177,10 +180,15 @@ func (ch CatalogHandler) updateCategory(ctx fiber.Ctx) error {
 	return response.OK(ctx, fiber.Map{"category": category}, "Updated successfully")
 }
 
-func (ch CatalogHandler) deleteCategoryById(ctx fiber.Ctx) error {
-	id := ctx.Params("id")
+func (ch CatalogHandler) deleteCategory(ctx fiber.Ctx) error {
+	idParam := ctx.Params("id")
 
-	if err := ch.catalogService.DeleteCategoryById(id); err != nil {
+	id, err := utils.ParseStringToUint(idParam)
+	if err != nil {
+		return response.BadRequest(ctx, "Invalid ID")
+	}
+
+	if err := ch.catalogService.DeleteCategory(id); err != nil {
 		return response.BadRequest(ctx, err.Error())
 	}
 
