@@ -122,7 +122,7 @@ func SetupCatalogRoutes(rh *rest.RestHandler) {
 func (ch CatalogHandler) getCategories(ctx fiber.Ctx) error {
 	categories, err := ch.catalogService.GetAllCategories()
 	if err != nil {
-		return response.BadRequest(ctx, err.Error())
+		return response.NotFound(ctx, "Categories not found")
 	}
 
 	return response.OK(ctx, fiber.Map{"categories": categories}, "Fetched successfully")
@@ -133,12 +133,12 @@ func (ch CatalogHandler) getCategoryById(ctx fiber.Ctx) error {
 
 	id, err := utils.ParseStringToUint(idParam)
 	if err != nil {
-		return response.BadRequest(ctx, "Invalid ID")
+		return response.NotFound(ctx, "Category not found")
 	}
 
 	category, err := ch.catalogService.GetCategoryById(id)
 	if err != nil {
-		return response.BadRequest(ctx, err.Error())
+		return response.NotFound(ctx, "Category not found")
 	}
 
 	return response.OK(ctx, fiber.Map{"category": category}, "Fetched successfully")
@@ -164,7 +164,7 @@ func (ch CatalogHandler) updateCategory(ctx fiber.Ctx) error {
 
 	id, err := utils.ParseStringToUint(idParam)
 	if err != nil {
-		return response.BadRequest(ctx, "Invalid ID")
+		return response.NotFound(ctx, "Category not found")
 	}
 
 	input := catalogDto.UpdateCategoryDto{}
@@ -185,7 +185,7 @@ func (ch CatalogHandler) deleteCategory(ctx fiber.Ctx) error {
 
 	id, err := utils.ParseStringToUint(idParam)
 	if err != nil {
-		return response.BadRequest(ctx, "Invalid ID")
+		return response.NotFound(ctx, "Category not found")
 	}
 
 	if err := ch.catalogService.DeleteCategory(id); err != nil {
