@@ -11,7 +11,7 @@ type Category struct {
 
 	ImageUrl     string    `json:"image_url"`
 	Products     []Product `json:"products" gorm:"foreignKey:CategoryId"`
-	DisplayOrder int       `json:"display_order"`
+	DisplayOrder *int      `json:"display_order"`
 
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
