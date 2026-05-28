@@ -26,17 +26,17 @@ func SetupCatalogRoutes(rh *rest.RestHandler) {
 		},
 	}
 
-	pubRoutes := app.Group("/products")
+	routes := app.Group("/catalog")
 	// Public endpoints
 	// Products
-	// pubRoutes.Get("/", handler.getProducts)
-	// pubRoutes.Get("/:id", handler.getProductById)
+	// routes.Get("/products", handler.getProducts)
+	// routes.Get("/products/:id", handler.getProductById)
 
 	// Categories
-	pubRoutes.Get("/categories", handler.getCategories)
-	pubRoutes.Get("/categories/:id", handler.getCategoryById)
+	routes.Get("/categories", handler.getCategories)
+	routes.Get("/categories/:id", handler.getCategoryById)
 
-	sellerRoutes := app.Group("/seller", rh.TokenService.AuthorizeSeller)
+	sellerRoutes := routes.Group("/seller", rh.TokenService.AuthorizeSeller)
 	// Private endpoints
 	// Products
 	// sellerRoutes.Post("/products", handler.createProduct)
